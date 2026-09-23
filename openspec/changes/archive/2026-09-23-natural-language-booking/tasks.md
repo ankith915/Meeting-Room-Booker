@@ -69,4 +69,4 @@ These require no database, no network, and no API key.
 - [x] 8.2 Run the full suite and `npx tsc --noEmit`; verify 0 failures and no type errors
 - [x] 8.3 Update `README.md` with the new capability and the required environment variables (`GROQ_API_KEY`, `GROQ_MODEL`); verify the documented setup steps work from a clean clone
 - [x] 8.4 Run `openspec validate natural-language-booking --strict` and verify it reports no issues
-- [ ] 8.5 Archive the change with `openspec archive natural-language-booking` and verify the requirements now appear under `openspec/specs/natural-language-booking/`
+- [x] 8.5 Archive the change with `openspec archive natural-language-booking` and verify the requirements now appear under `openspec/specs/natural-language-booking/`
