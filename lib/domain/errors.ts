@@ -84,7 +84,26 @@ export function isPostgresError(e: unknown): e is { code: string } {
     && typeof (e as { code: unknown }).code === 'string';
 }
 
+/**
+ * Pull the SQLSTATE out of a thrown value, following the `cause` chain.
+ *
+ * Drizzle does not rethrow the driver's error directly: it wraps it in its own
+ * `Error: Failed query: ...` and attaches the original as `cause`. So the
+ * SQLSTATE is NOT on the value you catch — checking `e.code` at the top level
+ * silently never matches, and every conflict would surface as an unhandled
+ * 500 instead of SLOT_TAKEN.
+ *
+ * Found by the EC-001 test failing against real Neon. A bare `catch` would
+ * have masked it by treating every failure as a conflict, which is exactly
+ * what Constitution V forbids.
+ */
+export function sqlStateOf(e: unknown, depth = 0): string | null {
+  if (depth > 5 || typeof e !== 'object' || e === null) return null;
+  if (isPostgresError(e)) return e.code;
+  return sqlStateOf((e as { cause?: unknown }).cause, depth + 1);
+}
+
 /** True only for the exclusion-constraint violation raised by bookings_no_overlap. */
 export function isExclusionViolation(e: unknown): boolean {
-  return isPostgresError(e) && e.code === EXCLUSION_VIOLATION;
+  return sqlStateOf(e) === EXCLUSION_VIOLATION;
 }
