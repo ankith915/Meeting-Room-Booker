@@ -1,0 +1,133 @@
+# System Architecture — Meeting Room Booker
+# Render: d2 --layout tala --theme 4 system-architecture.d2 out/system-architecture.svg
+
+vars: {
+  d2-config: {
+    layout-engine: tala
+    theme-id: 4
+    pad: 40
+  }
+}
+
+title: |md
+  # Meeting Room Booker — System Architecture
+  _The constraint, not the code, is what guarantees correctness_
+| {near: top-center; style.font-size: 28}
+
+classes: {
+  client: {
+    style: {fill: "#EEF2FF"; stroke: "#4F46E5"; stroke-width: 2; border-radius: 12; font-color: "#312E81"}
+  }
+  server: {
+    style: {fill: "#ECFDF5"; stroke: "#059669"; stroke-width: 2; border-radius: 12; font-color: "#064E3B"}
+  }
+  pure: {
+    style: {fill: "#FEF9C3"; stroke: "#CA8A04"; stroke-width: 2; border-radius: 12; font-color: "#713F12"}
+  }
+  data: {
+    style: {fill: "#FEE2E2"; stroke: "#DC2626"; stroke-width: 3; border-radius: 12; font-color: "#7F1D1D"}
+  }
+  guarantee: {
+    style: {fill: "#DC2626"; stroke: "#7F1D1D"; stroke-width: 3; border-radius: 8; font-color: "#FFFFFF"; bold: true; shadow: true}
+  }
+}
+
+browser: Browser {
+  class: client
+  icon: https://icons.terrastruct.com/dev%2Fhtml5.svg
+
+  roomlist: Room List + Availability Picker {
+    tooltip: "US1 / FR-002 — shows which rooms are free for a chosen range"
+  }
+  schedule: Room Day Schedule {
+    tooltip: "US2 / FR-012..FR-015 — bookings and gaps in room-local time"
+  }
+}
+
+vercel: Vercel — Next.js 15 {
+  class: server
+  icon: https://icons.terrastruct.com/dev%2Freact.svg
+
+  rsc: React Server Components {
+    tooltip: "Render room list and schedules on the server"
+  }
+
+  actions: Server Actions {
+    class: server
+    create: createBooking() {
+      tooltip: "FR-006..FR-011 — the single guarded write path"
+      style.bold: true
+    }
+    cancel: cancelBooking() {
+      tooltip: "FR-016..FR-020"
+    }
+  }
+
+  validation: Zod Validation {
+    class: server
+    tooltip: "EC-006..EC-011 — shape and business-limit checks"
+  }
+
+  domain: lib/domain — PURE {
+    class: pure
+    tooltip: "No I/O. No framework imports. Constitution IV"
+    interval: overlaps()
+    availability: isAvailable() / freeGaps()
+    schedule2: daySchedule()
+    suggest: suggestAlternatives()
+  }
+}
+
+neon: Neon Serverless Postgres {
+  class: data
+  icon: https://icons.terrastruct.com/dev%2Fpostgresql.svg
+
+  rooms: rooms
+  bookings: bookings
+
+  excl: "CONSTRAINT bookings_no_overlap\n\nEXCLUDE USING GIST (\n    room_id                              WITH =,\n    tstzrange(starts_at, ends_at, '[)')  WITH &&\n)\nWHERE (status = 'confirmed')" {
+    class: guarantee
+    style.font-size: 22
+    tooltip: "EC-001..EC-005 in one declaration. This is the mechanism of record."
+  }
+}
+
+# --- request flow ---
+browser.roomlist -> vercel.rsc: fetch availability
+browser.schedule -> vercel.rsc: fetch day schedule
+browser.roomlist -> vercel.actions.create: submit booking {style.stroke-width: 3; style.bold: true}
+browser.schedule -> vercel.actions.cancel: cancel
+
+vercel.actions.create -> vercel.validation: 1. validate input
+vercel.validation -> vercel.actions.create: reject early (EC-006..EC-011) {style.stroke-dash: 3}
+vercel.rsc -> vercel.domain: compute gaps / availability
+vercel.actions.create -> vercel.domain: suggest alternatives on refusal
+
+vercel.rsc -> neon.bookings: SELECT (read)
+vercel.actions.create -> neon.bookings: 2. INSERT {style.stroke-width: 3; style.bold: true}
+vercel.actions.cancel -> neon.bookings: UPDATE status
+
+neon.bookings -> neon.excl: 3. checked inside the write {style.stroke-width: 3; style.stroke: "#DC2626"}
+neon.excl -> vercel.actions.create: SQLSTATE 23P01 {
+  style.stroke: "#DC2626"
+  style.stroke-width: 3
+  style.stroke-dash: 4
+}
+vercel.actions.create -> browser.roomlist: SLOT_TAKEN + conflict + alternatives {style.stroke-dash: 4}
+
+note: |md
+  **Why the boundary sits at the database**
+
+  An availability check in the Server Action has a gap between
+  reading and writing. Two concurrent requests both pass, then
+  both write.
+
+  The `EXCLUDE` constraint has no gap — the check happens
+  *inside* the write, under an index lock.
+
+  Delete every line of validation above and overlapping
+  bookings are **still impossible**. That is SC-003.
+| {
+  near: bottom-center
+  style: {fill: "#FFFBEB"; stroke: "#D97706"; stroke-width: 2; border-radius: 8; font-color: "#78350F"}
+}

@@ -1,0 +1,114 @@
+# EC-001 — Why check-then-write fails and the constraint does not
+# Render: d2 --theme 4 race-condition.d2 out/race-condition.svg
+
+vars: {
+  d2-config: {
+    theme-id: 4
+    pad: 40
+  }
+}
+
+title: |md
+  # EC-001 — Simultaneous booking of the same slot
+  _The edge case that cannot be solved in application code_
+| {near: top-center; style.font-size: 28}
+
+broken: "❌   Approach A — check, then write (in application code)" {
+  style: {fill: "#FEF2F2"; stroke: "#DC2626"; stroke-width: 3; border-radius: 12; font-color: "#7F1D1D"; font-size: 20; bold: true}
+
+  seq: "" {
+    shape: sequence_diagram
+
+    alice: Alice
+    bob: Bob
+    app: Server Action
+    db: Postgres
+
+    alice -> app: "book Aurora 14:00–15:00"
+    bob -> app: "book Aurora 14:00–15:00"
+
+    app -> db: "SELECT … WHERE overlaps   (for Alice)"
+    db -> app: "0 rows — looks free ✅"
+    app -> db: "SELECT … WHERE overlaps   (for Bob)"
+    db -> app: "0 rows — looks free ✅" {
+      style: {stroke: "#DC2626"; stroke-width: 3}
+    }
+
+    app.gap: "⚠  THE GAP\nNeither has written yet.\nBoth believe the slot is free." {
+      style: {fill: "#FEE2E2"; stroke: "#DC2626"; stroke-width: 3; font-color: "#7F1D1D"; bold: true}
+    }
+
+    app -> db: "INSERT (Alice)"
+    db -> app: "201 Created"
+    app -> db: "INSERT (Bob)"
+    db -> app: "201 Created  ← should have failed" {
+      style: {stroke: "#DC2626"; stroke-width: 3}
+    }
+
+    app -> alice: confirmed
+    app -> bob: confirmed
+
+    db.bad: "💥  TWO confirmed bookings\nfor one room, one slot" {
+      style: {fill: "#DC2626"; stroke: "#7F1D1D"; font-color: "#FFFFFF"; bold: true}
+    }
+  }
+}
+
+fixed: "✅   Approach B — EXCLUDE constraint (in the schema)" {
+  style: {fill: "#F0FDF4"; stroke: "#059669"; stroke-width: 3; border-radius: 12; font-color: "#064E3B"; font-size: 20; bold: true}
+
+  seq: "" {
+    shape: sequence_diagram
+
+    alice: Alice
+    bob: Bob
+    app: Server Action
+    db: "Postgres\n+ bookings_no_overlap"
+
+    alice -> app: "book Aurora 14:00–15:00"
+    bob -> app: "book Aurora 14:00–15:00"
+
+    app -> db: "INSERT (Alice)"
+
+    db.note1: "The constraint is evaluated\nINSIDE the write, under an\nindex lock. No gap to exploit." {
+      style: {fill: "#DCFCE7"; stroke: "#059669"; stroke-width: 2; font-color: "#064E3B"; bold: true}
+    }
+
+    db -> app: "201 Created ✅"
+
+    app -> db: "INSERT (Bob)"
+    db -> app: "SQLSTATE 23P01 — exclusion_violation" {
+      style: {stroke: "#059669"; stroke-width: 3}
+    }
+
+    app -> db: "SELECT the conflicting booking"
+    db -> app: "Alice's booking + alternatives"
+
+    app -> alice: "confirmed"
+    app -> bob: "409 SLOT_TAKEN  +  who holds it  +  alternatives"
+
+    db.good: "✅  Exactly ONE confirmed booking.\nGuaranteed, not hoped for." {
+      style: {fill: "#059669"; stroke: "#064E3B"; font-color: "#FFFFFF"; bold: true}
+    }
+  }
+}
+
+broken -> fixed: "the fix is to move the guarantee down a layer" {
+  style: {stroke-width: 4; font-size: 18; bold: true; stroke: "#4F46E5"}
+}
+
+proof: |md
+  ## How we prove it — SC-001 and SC-003
+
+  - **SC-001** — fire **50 concurrent** requests for one identical room and range.
+    Assert exactly **1** confirmed, **49** refused `SLOT_TAKEN`,
+    and `SELECT count(*) = 1` in the database afterwards.
+    _Asserting the stored count is the real proof — response codes alone can lie._
+
+  - **SC-003** — **disable every application-layer availability check**, then retry.
+    Overlapping bookings are _still_ impossible.
+    This is what shows the guarantee does not rest on application code.
+| {
+  near: bottom-center
+  style: {fill: "#EEF2FF"; stroke: "#4F46E5"; stroke-width: 3; border-radius: 12; font-color: "#312E81"}
+}
