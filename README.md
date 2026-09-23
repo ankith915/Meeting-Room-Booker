@@ -3,9 +3,18 @@
 **BOLT Practice Problem Statement #2 (Intermediate)** · Spec-driven development with
 **GitHub Spec Kit** and **OpenSpec**
 
-> **Current status: 🟡 SPECIFICATION COMPLETE — AWAITING YOUR REVIEW.**
-> No application code has been written. That is deliberate, and it is the point of the exercise.
-> Read [What to review](#what-to-review) and tell me to proceed when you are satisfied.
+> **Current status: 🟢 WORKING — spec approved, v1 built and proven.**
+>
+> | | |
+> |---|---|
+> | Spec-only commit (0 source files) | `9745f47` |
+> | `btree_gist` verified on Neon | PostgreSQL 18.6, v1.8 |
+> | Tests | **114 passing** — 80 unit (no DB), 34 against real Neon |
+> | Edge cases with a named passing test | **18 / 18** (SC-002 satisfied) |
+> | SC-001 — 50 concurrent bookings | exactly **1** confirmed, 49 `SLOT_TAKEN` |
+> | SC-003 — app checks disabled | overlap **still impossible** |
+>
+> Remaining: design polish, deploy to Vercel, and the OpenSpec change (Part B).
 
 ---
 
