@@ -234,15 +234,28 @@ proven and you already have a viable demo.
 
 **UI tooling** (all free, all verified to exist):
 
-| Tool | Repo | Role |
-|---|---|---|
-| Taste Skill | [`nxpatterns/claude-taste-skill`](https://github.com/nxpatterns/claude-taste-skill) | Stops default "AI slop" UI; sets a real design direction |
-| Impeccable | [`pbakaus/impeccable`](https://github.com/pbakaus/impeccable) | `audit`, `critique`, `polish` passes over the built UI |
-| awesome-design-md | [`VoltAgent/awesome-design-md`](https://github.com/VoltAgent/awesome-design-md) | Drop one `DESIGN.md` in the root as the design system |
-| img2threejs | [`img2threejs/img2threejs`](https://github.com/img2threejs/img2threejs) | **Optional.** See the honest note below |
+| Tool | Repo | Role | Used here |
+|---|---|---|---|
+| awesome-design-md | [`VoltAgent/awesome-design-md`](https://github.com/VoltAgent/awesome-design-md) | Drop one `DESIGN.md` in the root as the design system | Yes — Cal.com system, root `DESIGN.md` |
+| Impeccable | [`pbakaus/impeccable`](https://github.com/pbakaus/impeccable) | `audit`, `critique`, `polish` passes over the built UI | Yes — `audit` found four WCAG failures, fixed in `1e41fab` |
+| Taste Skill | [`nxpatterns/claude-taste-skill`](https://github.com/nxpatterns/claude-taste-skill) | Stops default "AI slop" UI; sets a real design direction | Yes, but **at adapted dials** — see below |
+| img2threejs | [`img2threejs/img2threejs`](https://github.com/img2threejs/img2threejs) | Reference image → procedural Three.js scene | **No.** Cut deliberately; see the note below |
 
 Sequence that works: pick `DESIGN.md` **first** → Taste Skill for the build → Impeccable `audit`
 then `polish` at the end.
+
+> **On the Taste skill — what actually happened.** It was not installed during the first build,
+> even though T044 was ticked as though it had been. That was corrected: the skill is now at
+> `.claude/skills/taste/` and the UI was genuinely re-passed through it. It runs at dials 4/3/5
+> rather than its 8/6/4 baseline, because `DESIGN.md` is a pinned brief and four of the skill's
+> rules contradict it outright — most bluntly, Taste bans Inter and `DESIGN.md` specifies it. Both
+> skills agree on the tie-breaker: the brief wins. The full record, including what was overridden
+> and why, is in the "Taste Skill Application" section of `DESIGN.md`.
+>
+> The pass found two real defects the first build left behind: `DESIGN.md` asks for a Cal Sans
+> display face that was never loaded, so headings silently rendered in Inter; and `--font-mono`
+> pointed at an undefined `--font-mono-stack`, so error codes fell through to generic monospace.
+> Both are fixed.
 
 > **On img2threejs — being straight with you.** It converts a reference image into a procedural
 > Three.js scene. For a booking tool that is decoration, not function: it adds bundle weight and a

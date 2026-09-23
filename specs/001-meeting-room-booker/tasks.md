@@ -140,6 +140,11 @@ times, and correct gaps.
 **Purpose**: Cross-cutting quality. Depends on all user stories being complete.
 
 - [x] T044 Apply `DESIGN.md` tokens across all views; build the UI with the Taste skill to avoid generic defaults
+  - Tokens applied in the original build. The Taste skill itself was **not** installed at that
+    point, so this box overstated what had happened; it was corrected on 2026-09-23 by installing
+    the skill (`.claude/skills/taste/`, upstream `c807516`) and re-passing the UI through it.
+    Outcome, including the four rules deliberately overridden because `DESIGN.md` is a pinned
+    brief, is recorded in the "Taste Skill Application" section of `DESIGN.md`.
 - [x] T045 Impeccable `audit` pass; fix every finding
 - [x] T046 Impeccable `polish` pass
 - [x] T047 [P] Responsive down to 400px; verify no horizontal scroll

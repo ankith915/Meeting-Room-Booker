@@ -31,6 +31,12 @@ export function Button({
         'transition-colors duration-150',
         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink',
         'disabled:cursor-not-allowed',
+        // Tactile feedback (Taste Rule 5): a press should feel like a physical
+        // push. Uses `transform` so it is GPU-composited, never layout. It is
+        // deliberately not transitioned — the displacement should land on the
+        // same frame as the finger. Suppressed when disabled, and under
+        // prefers-reduced-motion, which this project honours by policy.
+        'active:translate-y-px disabled:active:translate-y-0 motion-reduce:active:translate-y-0',
         size === 'md' ? 'h-10 px-5 text-sm' : 'h-8 px-3 text-[13px]',
         variant === 'primary' &&
           'bg-primary text-on-primary hover:bg-primary-active disabled:bg-primary-disabled disabled:text-muted',
@@ -147,13 +153,46 @@ export function PageHeader({
   return (
     <header className="flex flex-wrap items-end justify-between gap-md border-b border-hairline pb-lg">
       <div className="min-w-0">
-        <h1 className="text-[28px] font-semibold leading-tight tracking-[-0.5px] text-ink">
+        <h1 className="font-display text-[28px] font-semibold leading-tight tracking-[-0.5px] text-ink">
           {title}
         </h1>
         {subtitle && <p className="mt-xxs text-sm text-muted">{subtitle}</p>}
       </div>
       {action}
     </header>
+  );
+}
+
+/* -------------------------------------------------------------- Skeleton */
+
+/**
+ * A single placeholder block.
+ *
+ * Taste Rule 5 asks for skeletal loaders sized to the layout they stand in for,
+ * rather than a generic spinner — the page should not reflow when real content
+ * lands. Animation is `opacity` only (via animate-pulse), so it composites on
+ * the GPU and is already neutralised by the reduced-motion block in globals.css.
+ */
+export function Skeleton({ className }: { className?: string }) {
+  return <span className={cx('block rounded bg-surface-strong', className)} />;
+}
+
+/** Mirrors the room row in app/page.tsx so the swap to real data is silent. */
+export function RoomRowSkeleton() {
+  return (
+    <Card className="p-md">
+      <div className="flex flex-wrap items-start justify-between gap-md">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-xs">
+            <Skeleton className="h-5 w-40" />
+            <Skeleton className="h-5 w-16 rounded-pill" />
+          </div>
+          <Skeleton className="mt-xs h-4 w-56 max-w-full" />
+          <Skeleton className="mt-xxs h-4 w-32" />
+        </div>
+        <Skeleton className="h-10 w-28 shrink-0 rounded-control" />
+      </div>
+    </Card>
   );
 }
 

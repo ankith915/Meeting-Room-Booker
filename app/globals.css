@@ -71,7 +71,19 @@
   --radius-pill: 999px;
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-mono-stack), ui-monospace, SFMono-Regular, monospace;
+  /*
+   * DESIGN.md's display roles ask for Cal Sans, a custom geometric face that is
+   * not on Google Fonts and was never actually loaded — so every heading
+   * silently rendered in Inter. Outfit is the nearest geometric substitute and
+   * gives the headings the distinct voice the brief intended.
+   */
+  --font-display: var(--font-outfit), var(--font-inter), ui-sans-serif, sans-serif;
+  /*
+   * Was `var(--font-mono-stack)`, which is defined nowhere — the token was dead
+   * and times fell through to the browser's generic monospace. DESIGN.md pins
+   * JetBrains Mono for this role.
+   */
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, monospace;
 }
 
 /*

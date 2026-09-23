@@ -540,3 +540,48 @@ Avatar photos use `{rounded.full}` (perfect circles) at 36px or 40px. Product UI
 - Form validation states beyond `{component.text-input-focused}` are not extracted — error / success states would need a sign-up or booking flow to confirm.
 - The actual booking widget surface (cal.com/{username}) is the product, not a marketing surface; its spec is out of scope.
 - Avatar photos in testimonial sections sometimes carry pastel circular fills with initials instead of photographs; both treatments coexist on the same page.
+
+## Taste Skill Application (2026-09-23)
+
+The UI was re-passed through the [Taste skill](https://github.com/nxpatterns/claude-taste-skill)
+(installed at `.claude/skills/taste/`, upstream commit `c807516`). The skill's
+Section 1 baseline dials are 8/6/4; this project runs 4/3/5.
+
+The skill instructs the agent to "ALWAYS listen to the user: adapt these values
+dynamically." This DESIGN.md is a pinned brief that the specification cites as a
+deliberate choice, so where the two conflict the brief wins — which is also what
+the Impeccable skill requires ("The brief wins… Redirecting a clear brief toward
+your taste is failure").
+
+### Applied
+
+- **Display typography.** The `display-*` roles above ask for Cal Sans, but
+  nothing ever loaded it, so every heading silently rendered in Inter. Cal Sans
+  is not publicly licensed (see Known Gaps), so **Outfit** — the nearest
+  geometric substitute on Google Fonts — now serves the display roles via
+  `--font-display`. This finally honours the brief's intent and satisfies the
+  skill's rule against Inter for display type.
+- **Monospace.** `--font-mono` pointed at `--font-mono-stack`, which is defined
+  nowhere, so the `code` role fell through to the browser's generic monospace.
+  **JetBrains Mono** is now loaded, as this file specifies.
+- **Tactile feedback** (Rule 5). Buttons take `active:translate-y-px` —
+  `transform` only, so it composites on the GPU; suppressed when disabled and
+  under `prefers-reduced-motion`.
+- **Skeleton loaders** (Rule 5). `app/loading.tsx` replaces the room list with
+  placeholders of the same shape during the server round trip, rather than a
+  spinner or a frozen page.
+
+### Deliberately overridden
+
+| Skill rule | Why not |
+|---|---|
+| "NO Inter Font: Banned" | This file specifies Inter for every title/body/caption role. Kept for UI text; display type moved to Outfit. |
+| `rounded-[2.5rem]`, `#f9fafb` canvas | The brief pins 12px radii and `#ffffff`. |
+| MOTION_INTENSITY 6 — perpetual Framer Motion loops | `globals.css` documents a deliberate narrow-motion policy, and framer-motion is not a dependency the spec justifies. |
+| DESIGN_VARIANCE 8 — asymmetric, anti-center layout | A dense schedule grid reads worse asymmetric. |
+
+### Not applied
+
+The palette was left untouched on purpose: `tests/unit/contrast.test.ts` parses
+these token values out of `globals.css` and asserts WCAG AA, so a colour change
+is a test change. All 146 unit tests pass after this pass.
