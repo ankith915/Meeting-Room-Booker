@@ -81,7 +81,7 @@ export function NaturalLanguageBooking() {
               key={ex}
               type="button"
               onClick={() => setText(ex)}
-              className="rounded-pill bg-surface-soft px-2.5 py-1 text-xs text-body transition-colors hover:bg-surface-strong"
+              className="tap-safe max-w-full rounded-pill bg-surface-soft px-2.5 py-1 text-left text-xs text-body transition-colors hover:bg-surface-strong"
             >
               {ex}
             </button>
@@ -107,7 +107,7 @@ export function NaturalLanguageBooking() {
           <button
             type="button"
             onClick={() => setStage({ at: 'idle' })}
-            className="mt-xs text-[13px] font-medium text-ink underline underline-offset-2"
+            className="tap-safe mt-xs text-[13px] font-medium text-ink underline underline-offset-2"
           >
             Book another
           </button>
@@ -129,7 +129,7 @@ export function NaturalLanguageBooking() {
           <button
             type="button"
             onClick={() => setStage({ at: 'idle' })}
-            className="mt-sm text-[13px] font-medium text-ink underline underline-offset-2"
+            className="tap-safe mt-sm text-[13px] font-medium text-ink underline underline-offset-2"
           >
             Try again
           </button>
@@ -210,7 +210,7 @@ function Parsed({
             </p>
           )}
           {c.confidence === 'uncertain' && (
-            <p className="mt-xs text-xs text-warning">
+            <p className="mt-xs text-xs text-warning-text">
               I am not confident I read that correctly — please check each value.
             </p>
           )}

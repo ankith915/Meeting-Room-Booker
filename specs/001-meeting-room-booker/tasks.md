@@ -139,11 +139,11 @@ times, and correct gaps.
 
 **Purpose**: Cross-cutting quality. Depends on all user stories being complete.
 
-- [ ] T044 Apply `DESIGN.md` tokens across all views; build the UI with the Taste skill to avoid generic defaults
-- [ ] T045 Impeccable `audit` pass; fix every finding
-- [ ] T046 Impeccable `polish` pass
-- [ ] T047 [P] Responsive down to 400px; verify no horizontal scroll
-- [ ] T048 [P] Loading, empty, and error states for every view (Constitution V)
+- [x] T044 Apply `DESIGN.md` tokens across all views; build the UI with the Taste skill to avoid generic defaults
+- [x] T045 Impeccable `audit` pass; fix every finding
+- [x] T046 Impeccable `polish` pass
+- [x] T047 [P] Responsive down to 400px; verify no horizontal scroll
+- [x] T048 [P] Loading, empty, and error states for every view (Constitution V)
 - [ ] T049 [P] Re-render all four D2 diagrams; confirm none has drifted from the spec
 - [ ] T050 Write root `README.md` — the course hand-in document
 - [ ] T051 Deploy to Vercel; set `DATABASE_URL`; run T013 against production

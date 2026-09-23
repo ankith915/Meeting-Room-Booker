@@ -27,7 +27,7 @@ export function Button({
     <button
       {...props}
       className={cx(
-        'inline-flex items-center justify-center gap-2 rounded-control font-medium',
+        'tap-safe inline-flex items-center justify-center gap-2 rounded-control font-medium',
         'transition-colors duration-150',
         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink',
         'disabled:cursor-not-allowed',
@@ -38,7 +38,7 @@ export function Button({
           'bg-canvas text-ink border border-hairline hover:bg-surface-soft disabled:text-muted',
         variant === 'ghost' && 'bg-transparent text-ink hover:bg-surface-soft',
         variant === 'danger' &&
-          'bg-canvas text-error border border-error/30 hover:bg-error/5 disabled:text-muted disabled:border-hairline',
+          'bg-canvas text-error-text border border-error/30 hover:bg-error/5 disabled:text-muted disabled:border-hairline',
         className,
       )}
     />
@@ -110,8 +110,8 @@ export function Badge({
       className={cx(
         'inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-xs font-medium',
         tone === 'neutral' && 'bg-surface-soft text-body',
-        tone === 'free' && 'bg-success/10 text-success',
-        tone === 'busy' && 'bg-error/10 text-error',
+        tone === 'free' && 'bg-success/10 text-success-text',
+        tone === 'busy' && 'bg-error/10 text-error-text',
         tone === 'muted' && 'bg-surface-card text-muted',
       )}
     >

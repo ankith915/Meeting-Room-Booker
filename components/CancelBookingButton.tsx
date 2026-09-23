@@ -68,7 +68,7 @@ export function CancelBookingButton({
           Keep
         </Button>
       </div>
-      {error && <p className="max-w-56 text-right text-xs text-error">{error}</p>}
+      {error && <p className="max-w-56 text-right text-xs text-error-text">{error}</p>}
     </form>
   );
 }

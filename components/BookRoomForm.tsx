@@ -48,7 +48,7 @@ export function BookRoomForm({ roomId, roomName, timezone, startsAt, endsAt, whe
         <button
           type="button"
           onClick={() => setResult(null)}
-          className="mt-sm text-[13px] font-medium text-ink underline underline-offset-2"
+          className="tap-safe mt-sm text-[13px] font-medium text-ink underline underline-offset-2"
         >
           Book another
         </button>
