@@ -12,6 +12,7 @@ import { localToInstant, formatLocalDate, formatLocalTime } from '@/lib/time';
 import { Badge, Card, Dot, EmptyState, PageHeader } from '@/components/ui';
 import { AvailabilitySearch } from '@/components/AvailabilitySearch';
 import { BookRoomForm } from '@/components/BookRoomForm';
+import { NaturalLanguageBooking } from '@/components/NaturalLanguageBooking';
 
 // Availability changes on every booking, so never serve this from a cache.
 export const dynamic = 'force-dynamic';
@@ -50,7 +51,17 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
         subtitle="Pick a time, see what is genuinely free, and book it."
       />
 
+      {/* Free text first — but the form below is the fallback and never goes away. */}
       <section className="mt-lg">
+        <NaturalLanguageBooking />
+      </section>
+
+      <section className="mt-lg">
+        <div className="mb-sm flex items-center gap-sm">
+          <span className="h-px flex-1 bg-hairline" />
+          <span className="text-xs text-muted">or pick a time yourself</span>
+          <span className="h-px flex-1 bg-hairline" />
+        </div>
         <AvailabilitySearch date={date} start={start} end={end} capacity={capacity} />
       </section>
 
