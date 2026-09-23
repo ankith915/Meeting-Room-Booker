@@ -119,7 +119,7 @@ SQL in a numbered migration is a hard requirement, not a preference.
 schema file does not know about are more prone to being clobbered on regeneration.
 
 **Risk accepted**: `drizzle-kit generate` could still produce a migration that drops the constraint
-if the schema drifts. Mitigated by T-032 — an integration test that asserts the constraint exists
+if the schema drifts. Mitigated by T012 — an integration test that asserts the constraint exists
 *by name* and fails loudly if it does not. A silent loss of the guarantee is the single worst
 outcome in this project, so it gets its own test.
 
@@ -151,7 +151,7 @@ impossible.
 
 **Requirement**: A-010 (modest scale), plus a working Vercel deployment for the demo.
 
-**Decision**: Next.js 15 App Router with Server Actions, deployed to Vercel, using the Neon
+**Decision**: Next.js 16 App Router with Server Actions, deployed to Vercel, using the Neon
 serverless driver.
 
 **Why**: Server Actions put the guarded write on the server without standing up a separate API

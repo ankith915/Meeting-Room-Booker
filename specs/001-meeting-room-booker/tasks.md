@@ -25,9 +25,9 @@ measures it. Test tasks below are not optional.
 
 **Purpose**: Project initialization
 
-- [ ] T001 Scaffold Next.js 15 + TypeScript + Tailwind at repository root
-- [ ] T002 Install dependencies: `drizzle-orm`, `drizzle-kit`, `@neondatabase/serverless`, `zod`, `date-fns`, `date-fns-tz`, `vitest`
-- [ ] T003 [P] Configure ESLint, Prettier, `vitest.config.ts`, and `.env.local` with `DATABASE_URL`
+- [x] T001 Scaffold Next.js 16.3.6 + TypeScript + Tailwind 4 at repository root
+- [x] T002 Install dependencies: `drizzle-orm`, `drizzle-kit`, `@neondatabase/serverless`, `zod`, `date-fns`, `date-fns-tz`, `vitest`
+- [x] T003 [P] Configure ESLint, `vitest.config.ts`, `tests/setup.ts`, `drizzle.config.ts`, `.gitignore` (`.env.local` still pending — needs the Neon string)
 - [ ] T003a [P] Add `DESIGN.md` to repository root (chosen from awesome-design-md) as the design system of record
 
 ---

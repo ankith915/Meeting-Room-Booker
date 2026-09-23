@@ -24,7 +24,7 @@ from the spec can be tested without a database.
 
 **Language/Version**: TypeScript 5.x on Node.js 24.19.0 (installed and verified)
 
-**Primary Dependencies**: Next.js 15 (App Router, Server Actions), Drizzle ORM, `@neondatabase/serverless`, Zod, Tailwind CSS, `date-fns` + `date-fns-tz`
+**Primary Dependencies**: Next.js 16.3.6 (App Router, Server Actions), Drizzle ORM, `@neondatabase/serverless`, Zod, Tailwind CSS, `date-fns` + `date-fns-tz`
 
 **Storage**: Neon serverless PostgreSQL. Requires the `btree_gist` extension — confirmed supported by Neon
 
