@@ -24,7 +24,7 @@ from the spec can be tested without a database.
 
 **Language/Version**: TypeScript 5.x on Node.js 24.19.0 (installed and verified)
 
-**Primary Dependencies**: Next.js 15 (App Router, Server Actions), Drizzle ORM, `@neondatabase/serverless`, Zod, Tailwind CSS, `date-fns` + `date-fns-tz`
+**Primary Dependencies**: Next.js 16.3.6 (App Router, Server Actions), Drizzle ORM, `@neondatabase/serverless`, Zod, Tailwind CSS, `date-fns` + `date-fns-tz`
 
 **Storage**: Neon serverless PostgreSQL. Requires the `btree_gist` extension — confirmed supported by Neon
 
@@ -38,7 +38,7 @@ from the spec can be tested without a database.
 
 **Constraints**: Correctness under concurrency is absolute (SC-001 admits zero duplicates). Domain logic must be I/O-free and framework-free. All instants stored UTC (FR-021)
 
-**Scale/Scope**: Tens of rooms, hundreds of bookings/day (A-010). 3 user stories, 17 edge cases, 23 functional requirements, 4 screens
+**Scale/Scope**: Tens of rooms, hundreds of bookings/day (A-010). 3 user stories, 18 edge cases, 23 functional requirements, 4 screens
 
 ## Constitution Check
 
@@ -48,7 +48,7 @@ from the spec can be tested without a database.
 |---|---|---|---|
 | **I. Integrity at the lowest layer** (NON-NEGOTIABLE) | Is the non-overlap invariant enforced in the schema, with application checks demoted to UX only? | ✅ PASS | `EXCLUDE USING GIST` in [data-model.md](./data-model.md). SC-003 verifies the guarantee survives with app checks disabled |
 | **II. Specification before implementation** | Does every planned behaviour trace to a numbered requirement? | ✅ PASS | Every task in tasks.md cites an FR or EC identifier. No planned behaviour lacks a spec line |
-| **III. Every edge case has a named test** | Does each of EC-001…EC-017 have a test task? | ✅ PASS | tasks.md contains a test task per identifier; SC-002 is the acceptance measure |
+| **III. Every edge case has a named test** | Does each of EC-001…EC-018 have a test task? | ✅ PASS | tasks.md contains a test task per identifier; SC-002 is the acceptance measure |
 | **IV. UTC storage, local rendering; half-open intervals** | Is `[start, end)` expressed identically in schema, domain, and UI? | ✅ PASS | `tstzrange(..., '[)')` in schema; `overlaps()` uses strict `<` in domain; UI renders end-exclusive. All columns `timestamptz` |
 | **V. No silent failures** | Does every refusal carry a typed code and a specific message? | ✅ PASS | 9 reason codes defined in FR-008/FR-011; `BookingError` discriminated union; SC-005 measures 100% coverage |
 
@@ -131,6 +131,14 @@ the guarded write on the server without a separate API service to deploy, and th
 external API consumer. The one structural rule that matters is the `lib/domain/` boundary: it may
 not import from `db/`, `next/`, or `react`, which is what makes the spec's rules testable in
 isolation and keeps them from being quietly reimplemented inside a React component.
+
+**Deviation recorded during implementation**: the booking logic lives in
+`lib/server/bookings.ts` and `lib/server/queries.ts`, with `app/actions/*` as thin `'use server'`
+wrappers that add only cache revalidation and Date-to-string serialisation. The structure above put
+the logic directly in `app/actions/`. The change was made because a `'use server'` module importing
+`next/cache` cannot be imported by Vitest outside a Next runtime, and the concurrency test (T013)
+must call the real implementation. The constitution's domain-purity rule is unaffected: the guarded
+write still has exactly one entry point.
 
 `drizzle/0001_exclusion_constraint.sql` is hand-written and must stay that way — `drizzle-kit` does
 not generate `EXCLUDE` constraints or `CREATE EXTENSION`. This file is the literal embodiment of

@@ -25,10 +25,10 @@ measures it. Test tasks below are not optional.
 
 **Purpose**: Project initialization
 
-- [ ] T001 Scaffold Next.js 15 + TypeScript + Tailwind at repository root
-- [ ] T002 Install dependencies: `drizzle-orm`, `drizzle-kit`, `@neondatabase/serverless`, `zod`, `date-fns`, `date-fns-tz`, `vitest`
-- [ ] T003 [P] Configure ESLint, Prettier, `vitest.config.ts`, and `.env.local` with `DATABASE_URL`
-- [ ] T003a [P] Add `DESIGN.md` to repository root (chosen from awesome-design-md) as the design system of record
+- [x] T001 Scaffold Next.js 16.3.6 + TypeScript + Tailwind 4 at repository root
+- [x] T002 Install dependencies: `drizzle-orm`, `drizzle-kit`, `@neondatabase/serverless`, `zod`, `date-fns`, `date-fns-tz`, `vitest`
+- [x] T003 [P] Configure ESLint, `vitest.config.ts`, `tests/setup.ts`, `drizzle.config.ts`, `.gitignore`, `.env.local`
+- [x] T003a [P] Add `DESIGN.md` to repository root (chosen from awesome-design-md) as the design system of record
 
 ---
 
@@ -38,14 +38,14 @@ measures it. Test tasks below are not optional.
 
 **⚠️ CRITICAL**: No user story work may begin until this phase is complete.
 
-- [ ] **T004 Verify `btree_gist` is available on Neon** — run `CREATE EXTENSION IF NOT EXISTS btree_gist;` against the real database and confirm success. **This is the first task in the project.** If it fails, stop: R-001's fallback must be adopted and the spec amended before any code is written (plan.md risk 1)
-- [ ] T005 Define Drizzle schema in `db/schema.ts` — `rooms` and `bookings` per data-model.md, with all CHECK constraints
-- [ ] T006 Generate baseline migration `drizzle/0000_init.sql` via `drizzle-kit generate`
-- [ ] **T007 Hand-write `drizzle/0001_exclusion_constraint.sql`** — `CREATE EXTENSION btree_gist` + `ALTER TABLE bookings ADD CONSTRAINT bookings_no_overlap EXCLUDE USING GIST (...) WHERE (status = 'confirmed')`. **This file is the embodiment of Constitution I — the single most important file in the repository** (FR-006, FR-007)
-- [ ] T008 Apply migrations; create `db/client.ts` using the Neon serverless driver
-- [ ] T009 [P] Seed reference rooms in `db/seed.ts` (A-005) — include one room in `Asia/Kolkata` and one in `America/New_York` so EC-013 and EC-014 are testable
-- [ ] T010 [P] Define `BookingError` discriminated union and all 12 reason codes in `lib/domain/errors.ts` (FR-011)
-- [ ] T011 [P] Implement UTC ↔ room-local conversion in `lib/time.ts` (FR-021, FR-014, EC-013)
+- [x] **T004 Verify `btree_gist` is available on Neon** — run `CREATE EXTENSION IF NOT EXISTS btree_gist;` against the real database and confirm success. **This is the first task in the project.** If it fails, stop: R-001's fallback must be adopted and the spec amended before any code is written (plan.md risk 1)
+- [x] T005 Define Drizzle schema in `db/schema.ts` — `rooms` and `bookings` per data-model.md, with all CHECK constraints
+- [x] T006 Generate baseline migration `drizzle/0000_init.sql` via `drizzle-kit generate`
+- [x] **T007 Hand-write `drizzle/0001_exclusion_constraint.sql`** — `CREATE EXTENSION btree_gist` + `ALTER TABLE bookings ADD CONSTRAINT bookings_no_overlap EXCLUDE USING GIST (...) WHERE (status = 'confirmed')`. **This file is the embodiment of Constitution I — the single most important file in the repository** (FR-006, FR-007)
+- [x] T008 Apply migrations; create `db/client.ts` using the Neon serverless driver
+- [x] T009 [P] Seed reference rooms in `db/seed.ts` (A-005) — include one room in `Asia/Kolkata` and one in `America/New_York` so EC-013 and EC-014 are testable
+- [x] T010 [P] Define `BookingError` discriminated union and all 12 reason codes in `lib/domain/errors.ts` (FR-011)
+- [x] T011 [P] Implement UTC ↔ room-local conversion in `lib/time.ts` (FR-021, FR-014, EC-013)
 
 **Checkpoint**: The guarantee exists in the database. User story work may now begin.
 
@@ -62,25 +62,25 @@ clients; confirm exactly one booking exists in both cases.
 
 > **Write these FIRST and confirm they FAIL before implementing.**
 
-- [ ] T012 [P] [US1] Assert constraint exists by name — `tests/integration/constraint-present.test.ts`. Fails loudly if a migration ever drops it (plan.md risk 2)
-- [ ] **T013 [US1] EC-001 concurrency test** — `tests/concurrency/ec001-simultaneous.test.ts`. 50 parallel `createBooking` calls for one room and range; assert 1 fulfilled, 49 `SLOT_TAKEN`, **and `SELECT count(*) = 1`** (SC-001). **The centrepiece of the demo**
-- [ ] T014 [P] [US1] EC-002 partial overlap, EC-003 adjacent, EC-004 other room, EC-005 cancelled-does-not-block — `tests/integration/overlap.test.ts`
-- [ ] T015 [P] [US1] EC-006…EC-012 validation tests, one per reason code — `tests/unit/validation.test.ts`
-- [ ] T016 [P] [US1] Pure `overlaps()` property tests: symmetry, adjacency, containment — `tests/unit/interval.test.ts`
-- [ ] T017 [US1] SC-003 test — disable app-layer availability checking via test flag; assert overlap still impossible
+- [x] T012 [P] [US1] Assert constraint exists by name — `tests/integration/constraint-present.test.ts`. Fails loudly if a migration ever drops it (plan.md risk 2)
+- [x] **T013 [US1] EC-001 concurrency test** — `tests/concurrency/ec001-simultaneous.test.ts`. 50 parallel `createBooking` calls for one room and range; assert 1 fulfilled, 49 `SLOT_TAKEN`, **and `SELECT count(*) = 1`** (SC-001). **The centrepiece of the demo**
+- [x] T014 [P] [US1] EC-002 partial overlap, EC-003 adjacent, EC-004 other room, EC-005 cancelled-does-not-block — `tests/integration/overlap.test.ts`
+- [x] T015 [P] [US1] EC-006…EC-012 and EC-018 validation tests, one per reason code — `tests/unit/validation.test.ts`
+- [x] T016 [P] [US1] Pure `overlaps()` property tests: symmetry, adjacency, containment — `tests/unit/interval.test.ts`
+- [x] T017 [US1] SC-003 test — disable app-layer availability checking via test flag; assert overlap still impossible
 
 ### Implementation for User Story 1
 
-- [ ] T018 [P] [US1] `lib/domain/interval.ts` — `overlaps()`, half-open semantics (FR-005). Pure
-- [ ] T019 [P] [US1] `lib/domain/availability.ts` — `isAvailable()` (FR-002). Pure
-- [ ] T020 [P] [US1] `lib/validation.ts` — Zod schemas for every rule in EC-006…EC-011
-- [ ] T021 [US1] `lib/domain/suggest.ts` — `suggestAlternatives()` (FR-010). Pure. Depends on T018, T019
-- [ ] T022 [US1] **`app/actions/create-booking.ts`** per [contracts/create-booking.md](./contracts/create-booking.md) — validate → load room → time rules → INSERT → catch SQLSTATE `23P01` → `SLOT_TAKEN` (FR-004…FR-011). Depends on T018–T021
-- [ ] T023 [US1] Catch **only** `23P01`; re-throw everything else. A bare catch is a constitutional violation (Constitution V)
-- [ ] T024 [US1] Enrich `SLOT_TAKEN` with conflicting booking detail and alternatives (FR-009, FR-010)
-- [ ] T025 [US1] `app/page.tsx` — room list with date/time picker and live availability (FR-002)
-- [ ] T026 [US1] Booking form + confirmation, with the submit button disabled while in flight
-- [ ] T027 [US1] `SLOT_TAKEN` UI — show who holds the slot and offer alternatives as one-click rebook
+- [x] T018 [P] [US1] `lib/domain/interval.ts` — `overlaps()`, half-open semantics (FR-005). Pure
+- [x] T019 [P] [US1] `lib/domain/availability.ts` — `isAvailable()` (FR-002). Pure
+- [x] T020 [P] [US1] `lib/validation.ts` — Zod schemas for every rule in EC-006…EC-011
+- [x] T021 [US1] `lib/domain/suggest.ts` — `suggestAlternatives()` (FR-010). Pure. Depends on T018, T019
+- [x] T022 [US1] **`app/actions/create-booking.ts`** per [contracts/create-booking.md](./contracts/create-booking.md) — validate → load room → time rules → INSERT → catch SQLSTATE `23P01` → `SLOT_TAKEN` (FR-004…FR-011). Depends on T018–T021
+- [x] T023 [US1] Catch **only** `23P01`; re-throw everything else. A bare catch is a constitutional violation (Constitution V)
+- [x] T024 [US1] Enrich `SLOT_TAKEN` with conflicting booking detail and alternatives (FR-009, FR-010)
+- [x] T025 [US1] `app/page.tsx` — room list with date/time picker and live availability (FR-002)
+- [x] T026 [US1] Booking form + confirmation, with the submit button disabled while in flight
+- [x] T027 [US1] `SLOT_TAKEN` UI — show who holds the slot and offer alternatives as one-click rebook
 
 **Checkpoint**: US1 fully functional. **EC-001 is demonstrable — this alone is a viable demo.**
 
@@ -95,18 +95,18 @@ times, and correct gaps.
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T028 [P] [US2] `freeGaps()` unit tests incl. empty room → one full-window gap (FR-013, US2-3) — `tests/unit/gaps.test.ts`
-- [ ] T029 [P] [US2] EC-014 — same schedule under two `TZ` values yields identical local times
-- [ ] T030 [P] [US2] EC-013 — DST transition dates in `America/New_York`; durations reflect elapsed real time
-- [ ] T031 [P] [US2] FR-015 — a 23:30 room-local booking appears on that room-local date
+- [x] T028 [P] [US2] `freeGaps()` unit tests incl. empty room → one full-window gap (FR-013, US2-3) — `tests/unit/gaps.test.ts`
+- [x] T029 [P] [US2] EC-014 — same schedule under two `TZ` values yields identical local times
+- [x] T030 [P] [US2] EC-013 — DST transition dates in `America/New_York`; durations reflect elapsed real time
+- [x] T031 [P] [US2] FR-015 — a 23:30 room-local booking appears on that room-local date
 
 ### Implementation for User Story 2
 
-- [ ] T032 [P] [US2] `lib/domain/schedule.ts` — `daySchedule()` (FR-012, FR-015). Pure
-- [ ] T033 [P] [US2] `lib/domain/availability.ts` — `freeGaps()` (FR-013). Pure
-- [ ] T034 [US2] `app/actions/queries.ts` — `listAvailability`, `getDaySchedule` per [contracts/list-availability.md](./contracts/list-availability.md)
-- [ ] T035 [US2] `app/rooms/[roomId]/page.tsx` — day timeline, bookings and gaps, timezone labelled (FR-012…FR-015)
-- [ ] T036 [US2] Book-this-gap affordance routing into the same `createBooking` path
+- [x] T032 [P] [US2] `lib/domain/schedule.ts` — `daySchedule()` (FR-012, FR-015). Pure
+- [x] T033 [P] [US2] `lib/domain/availability.ts` — `freeGaps()` (FR-013). Pure
+- [x] T034 [US2] `app/actions/queries.ts` — `listAvailability`, `getDaySchedule` per [contracts/list-availability.md](./contracts/list-availability.md)
+- [x] T035 [US2] `app/rooms/[roomId]/page.tsx` — day timeline, bookings and gaps, timezone labelled (FR-012…FR-015)
+- [x] T036 [US2] Book-this-gap affordance routing into the same `createBooking` path
 
 **Checkpoint**: US1 and US2 both work independently.
 
@@ -120,16 +120,16 @@ times, and correct gaps.
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T037 [P] [US3] EC-015 `NOT_ORGANISER`, EC-016 `ALREADY_ENDED` — `tests/integration/cancel.test.ts`
-- [ ] T038 [P] [US3] EC-017 — cancelling twice succeeds, changes nothing
-- [ ] T039 [P] [US3] FR-020 — cancel then rebook the same range succeeds
-- [ ] T040 [P] [US3] FR-022 — cancelled row is retained, not deleted
+- [x] T037 [P] [US3] EC-015 `NOT_ORGANISER`, EC-016 `ALREADY_ENDED` — `tests/integration/cancel.test.ts`
+- [x] T038 [P] [US3] EC-017 — cancelling twice succeeds, changes nothing
+- [x] T039 [P] [US3] FR-020 — cancel then rebook the same range succeeds
+- [x] T040 [P] [US3] FR-022 — cancelled row is retained, not deleted
 
 ### Implementation for User Story 3
 
-- [ ] T041 [US3] `app/actions/cancel-booking.ts` per [contracts/cancel-booking.md](./contracts/cancel-booking.md). **Idempotency check must precede the organiser and ended checks** — see contract
-- [ ] T042 [US3] `UPDATE ... WHERE id = ? AND status = 'confirmed'` to make concurrent double-cancel a no-op
-- [ ] T043 [US3] Cancel control on the schedule view with confirmation
+- [x] T041 [US3] `app/actions/cancel-booking.ts` per [contracts/cancel-booking.md](./contracts/cancel-booking.md). **Idempotency check must precede the organiser and ended checks** — see contract
+- [x] T042 [US3] `UPDATE ... WHERE id = ? AND status = 'confirmed'` to make concurrent double-cancel a no-op
+- [x] T043 [US3] Cancel control on the schedule view with confirmation
 
 **Checkpoint**: All three user stories independently functional.
 
@@ -139,15 +139,15 @@ times, and correct gaps.
 
 **Purpose**: Cross-cutting quality. Depends on all user stories being complete.
 
-- [ ] T044 Apply `DESIGN.md` tokens across all views; build the UI with the Taste skill to avoid generic defaults
-- [ ] T045 Impeccable `audit` pass; fix every finding
-- [ ] T046 Impeccable `polish` pass
-- [ ] T047 [P] Responsive down to 400px; verify no horizontal scroll
-- [ ] T048 [P] Loading, empty, and error states for every view (Constitution V)
+- [x] T044 Apply `DESIGN.md` tokens across all views; build the UI with the Taste skill to avoid generic defaults
+- [x] T045 Impeccable `audit` pass; fix every finding
+- [x] T046 Impeccable `polish` pass
+- [x] T047 [P] Responsive down to 400px; verify no horizontal scroll
+- [x] T048 [P] Loading, empty, and error states for every view (Constitution V)
 - [ ] T049 [P] Re-render all four D2 diagrams; confirm none has drifted from the spec
 - [ ] T050 Write root `README.md` — the course hand-in document
 - [ ] T051 Deploy to Vercel; set `DATABASE_URL`; run T013 against production
-- [ ] T052 **Verify SC-002**: every one of EC-001…EC-017 has a passing named test. Any gap is an unmet requirement
+- [x] T052 **Verify SC-002**: every one of EC-001…EC-018 has a passing named test. Any gap is an unmet requirement
 
 ---
 
@@ -210,11 +210,12 @@ breaking the previous ones.
 | EC-014 | T029 | T011, T035 |
 | EC-015, EC-016 | T037 | T041 |
 | EC-017 | T038 | T041 |
+| EC-018 | T015 | T020, T022 |
 | SC-001 | T013 | T007 |
 | SC-002 | T052 | all |
 | SC-003 | T017 | T007 |
 
-**17 edge cases, 17 covered.** Any row without a passing test is an unmet requirement (Constitution III).
+**18 edge cases, 18 covered.** Any row without a passing test is an unmet requirement (Constitution III).
 
 ---
 

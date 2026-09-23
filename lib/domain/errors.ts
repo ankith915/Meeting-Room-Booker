@@ -1,0 +1,124 @@
+/**
+ * Booking error taxonomy.
+ *
+ * Constitution Principle V (No silent failures): every rejected operation
+ * returns a typed, machine-readable code AND a human-readable message naming
+ * the specific limit or conflict that caused it.
+ *
+ * This file is PURE: no I/O, no framework imports (Constitution: domain purity).
+ *
+ * Spec: FR-008, FR-011 | Contracts: contracts/create-booking.md, contracts/cancel-booking.md
+ */
+
+/** Refusals from createBooking. */
+export const BOOKING_ERROR_CODES = [
+  'INVALID_TITLE',           // EC-011
+  'INVALID_RANGE',           // EC-006 — ends_at <= starts_at
+  'PAST_BOOKING',            // EC-007
+  'ROOM_NOT_FOUND',          // EC-008
+  'ROOM_INACTIVE',           // EC-008
+  'OUTSIDE_BUSINESS_HOURS',  // EC-009, EC-012
+  'DURATION_EXCEEDED',       // EC-010
+  'TOO_FAR_AHEAD',           // EC-018 (A-009, 90-day horizon)
+  'SLOT_TAKEN',              // EC-001, EC-002 — the one the database decides
+] as const;
+
+/** Refusals from cancelBooking. */
+export const CANCEL_ERROR_CODES = [
+  'BOOKING_NOT_FOUND',
+  'NOT_ORGANISER',           // EC-015
+  'ALREADY_ENDED',           // EC-016
+] as const;
+
+/**
+ * Refusals from free-text booking.
+ *
+ * None of these can produce a booking — they all end in the user being asked
+ * something, or being handed the manual form. The parser has no write path.
+ */
+export const PARSE_ERROR_CODES = [
+  'UNPARSEABLE',             // EC-020 — no intent could be derived
+  'AMBIGUOUS_ROOM',          // EC-019 — several rooms plausibly match
+  'MISSING_END_TIME',        // EC-024 — a default was applied; say so
+  'PARSER_UNAVAILABLE',      // EC-025 — no key, rate limit, or network failure
+  'LOW_CONFIDENCE',          // below threshold; confirm each field explicitly
+] as const;
+
+export type BookingErrorCode = (typeof BOOKING_ERROR_CODES)[number];
+export type CancelErrorCode = (typeof CANCEL_ERROR_CODES)[number];
+export type ParseErrorCode = (typeof PARSE_ERROR_CODES)[number];
+export type ErrorCode = BookingErrorCode | CancelErrorCode | ParseErrorCode;
+
+/** The booking that already holds the requested slot (FR-009). */
+export type ConflictDetail = {
+  bookingId: string;
+  title: string;
+  organiser: string;
+  startsAt: string;
+  endsAt: string;
+};
+
+/** Somewhere else the user could go (FR-010). */
+export type Alternative =
+  | { kind: 'other-room'; roomId: string; roomName: string; startsAt: string; endsAt: string }
+  | { kind: 'other-time'; roomId: string; startsAt: string; endsAt: string };
+
+export type BookingError = {
+  code: ErrorCode;
+  message: string;
+  /** Present only for SLOT_TAKEN. */
+  conflict?: ConflictDetail;
+  /** Present only for SLOT_TAKEN, and only when an alternative exists. */
+  alternatives?: Alternative[];
+};
+
+export type Result<T> = { ok: true; value: T } | { ok: false; error: BookingError };
+
+export const ok = <T>(value: T): Result<T> => ({ ok: true, value });
+
+export const err = (
+  code: ErrorCode,
+  message: string,
+  extra?: Pick<BookingError, 'conflict' | 'alternatives'>,
+): Result<never> => ({ ok: false, error: { code, message, ...extra } });
+
+/**
+ * PostgreSQL SQLSTATE for exclusion_violation.
+ *
+ * This is the code `bookings_no_overlap` raises, and the ONLY code that may be
+ * translated into SLOT_TAKEN. Catching more broadly would report a connection
+ * failure as a booking conflict and hide real faults — a Principle V violation.
+ *
+ * See contracts/create-booking.md § Error handling requirements.
+ */
+export const EXCLUSION_VIOLATION = '23P01';
+
+/** Narrow an unknown thrown value to something carrying a SQLSTATE. */
+export function isPostgresError(e: unknown): e is { code: string } {
+  return typeof e === 'object' && e !== null && 'code' in e
+    && typeof (e as { code: unknown }).code === 'string';
+}
+
+/**
+ * Pull the SQLSTATE out of a thrown value, following the `cause` chain.
+ *
+ * Drizzle does not rethrow the driver's error directly: it wraps it in its own
+ * `Error: Failed query: ...` and attaches the original as `cause`. So the
+ * SQLSTATE is NOT on the value you catch — checking `e.code` at the top level
+ * silently never matches, and every conflict would surface as an unhandled
+ * 500 instead of SLOT_TAKEN.
+ *
+ * Found by the EC-001 test failing against real Neon. A bare `catch` would
+ * have masked it by treating every failure as a conflict, which is exactly
+ * what Constitution V forbids.
+ */
+export function sqlStateOf(e: unknown, depth = 0): string | null {
+  if (depth > 5 || typeof e !== 'object' || e === null) return null;
+  if (isPostgresError(e)) return e.code;
+  return sqlStateOf((e as { cause?: unknown }).cause, depth + 1);
+}
+
+/** True only for the exclusion-constraint violation raised by bookings_no_overlap. */
+export function isExclusionViolation(e: unknown): boolean {
+  return sqlStateOf(e) === EXCLUSION_VIOLATION;
+}

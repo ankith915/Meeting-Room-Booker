@@ -32,7 +32,9 @@ npm install
 # .env.local  (gitignored — never commit)
 # DATABASE_URL=postgresql://user:pass@ep-xxx.region.aws.neon.tech/neondb?sslmode=require
 
-npx drizzle-kit push        # applies 0000_init.sql and 0001_exclusion_constraint.sql
+npm run db:migrate          # applies 0000_init.sql and 0001_exclusion_constraint.sql
+                            # NEVER `drizzle-kit push` — it does not know about the
+                            # hand-written constraint and will offer to drop it
 npm run seed                # reference rooms (A-005)
 npm run dev                 # http://localhost:3000
 ```
@@ -108,6 +110,7 @@ most convincing thing to show a reviewer.**
 | EC-010 | a 9-hour range | `DURATION_EXCEEDED`, message names 8h |
 | EC-011 | blank title | `INVALID_TITLE` |
 | EC-012 | 23:00–01:00 | `OUTSIDE_BUSINESS_HOURS` |
+| EC-018 | a start more than 90 days ahead | `TOO_FAR_AHEAD`, message names the horizon |
 
 ### Time handling
 
@@ -138,13 +141,13 @@ npm run test:integration  # constraint behaviour — needs DATABASE_URL
 npm run test:concurrency  # EC-001 / SC-001
 ```
 
-**SC-002 requires every one of EC-001…EC-017 to have a passing named test.** Confirm with:
+**SC-002 requires every one of EC-001…EC-018 to have a passing named test.** Confirm with:
 
 ```powershell
 npm test -- --reporter=verbose | Select-String "EC-0"
 ```
 
-Seventeen distinct identifiers must appear. A missing one is an unmet requirement, not a missing
+Eighteen distinct identifiers must appear. A missing one is an unmet requirement, not a missing
 test.
 
 ## Regenerate diagrams
