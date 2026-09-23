@@ -1,32 +1,66 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+context: |
+  Meeting Room Booker — BOLT spec-driven development practice, problem #2.
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+  Tech stack: TypeScript, Next.js 16 (App Router, Server Actions), Drizzle ORM,
+  Neon serverless PostgreSQL, Zod, date-fns-tz, Tailwind 4, Vitest. Deployed to
+  Vercel.
 
-# Per-operation guidance (optional)
-# Add advisory guidance for how apply and archive work should be conducted.
-# This is separate from artifact rules above.
-# Example:
-#   operations:
-#     apply:
-#       guidance:
-#         - Keep test summaries concise
-#     archive:
-#       guidance:
-#         - Summarize the archive outcome before finishing
+  HISTORY: v1 was specified and built with GitHub Spec Kit. Its artifacts live in
+  specs/001-meeting-room-booker/ (spec.md, plan.md, research.md, data-model.md,
+  tasks.md, contracts/, D2 diagrams) and the project constitution is at
+  .specify/memory/constitution.md. OpenSpec drives CHANGES to that baseline.
+  Read the Spec Kit spec before proposing anything — it is the current truth.
+
+  THE NON-NEGOTIABLE CONSTRAINT (Constitution Principle I):
+  Booking integrity is enforced by the database, never by application code alone.
+  A PostgreSQL EXCLUDE USING GIST constraint named bookings_no_overlap makes
+  overlapping confirmed bookings impossible:
+
+    EXCLUDE USING GIST (room_id WITH =,
+                        tstzrange(starts_at, ends_at, '[)') WITH &&)
+    WHERE (status = 'confirmed')
+
+  It lives in drizzle/0001_exclusion_constraint.sql, is hand-written, and must
+  never be dropped or weakened. Never run `drizzle-kit push` — it cannot see the
+  constraint and will offer to remove it.
+
+  UNTRUSTED-INPUT PARITY: any input that did not come from a validated form —
+  including output from a language model — MUST traverse the same validation and
+  persistence path as form input. createBooking() in lib/server/bookings.ts is
+  the ONLY path that may create a confirmed booking. No feature may add a second
+  insert path.
+
+  DOMAIN PURITY: lib/domain/* must not import from db/, next/, or react. Overlap,
+  availability, gap and schedule logic lives there as pure functions so the
+  spec's rules are testable without a database or a browser.
+
+  OTHER INVARIANTS:
+  - Booking intervals are half-open [start, end). Adjacent bookings do not clash.
+  - All instants stored UTC; rendered in the ROOM's IANA timezone, never the
+    viewer's.
+  - Every refusal returns a typed code AND a message naming the specific limit or
+    conflict. No generic failures, no swallowed exceptions.
+  - Every edge case carries a stable identifier (EC-001..EC-018) and MUST have at
+    least one automated test naming it.
+
+  Current state: 116 tests passing (80 unit with no database, 36 against real
+  Neon). 18/18 edge cases covered.
+
+rules:
+  proposal:
+    - State plainly whether the change touches the booking write path; if it does, say how the guarantee is preserved.
+    - Include a Non-goals section.
+  tasks:
+    - Every task cites the requirement or edge-case identifier it satisfies.
+    - Each new edge case gets its own test task, named with its identifier.
+
+operations:
+  apply:
+    guidance:
+      - Never add a second path that inserts a confirmed booking. Route through createBooking().
+      - Run the concurrency suite before declaring the change done.
+  archive:
+    guidance:
+      - Summarise which requirements moved into the main specs.
