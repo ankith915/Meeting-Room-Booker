@@ -2,14 +2,18 @@
 
 Each task cites the requirement or edge case it satisfies, and states how completion is verified.
 
+> **Revised**: provider changed from Anthropic to Groq (`openai/gpt-oss-120b`) after the user
+> supplied Groq credentials. `scripts/probe-groq.ts` verified the extraction mechanism against the
+> live API before these tasks were rewritten. See design.md D3.
+
 Ordering follows the migration plan in [design.md](./design.md): pure domain first, then the parser
 behind its interface, then the UI. Nothing user-visible ships until the guarantees are tested.
 
 ## 1. Dependency and configuration
 
-- [ ] 1.1 Add `@anthropic-ai/sdk` to `package.json`; verify `npx tsc --noEmit` still passes and the existing 116 tests are unaffected by running `npm test`
-- [ ] 1.2 Add `ANTHROPIC_API_KEY` to `.env.local` (gitignored) and document it in `specs/001-meeting-room-booker/quickstart.md`; verify by confirming `git check-ignore .env.local` still reports it ignored
-- [ ] 1.3 Add `PARSER` constants — model id `claude-opus-5`, default duration 60 minutes, confidence threshold — in one place next to `POLICY`; verify by grepping that no model id or magic duration appears anywhere else
+- [ ] 1.1 Add `openai` to `package.json` (used against Groq's OpenAI-compatible endpoint, D3); verify `npx tsc --noEmit` still passes and the existing 116 tests are unaffected by running `npm test`
+- [x] 1.2 Add `GROQ_API_KEY` and `GROQ_MODEL` to `.env.local` (gitignored); verify `git check-ignore .env.local` reports it ignored and `git grep gsk_` finds nothing tracked. Document both in `specs/001-meeting-room-booker/quickstart.md`
+- [ ] 1.3 Add `PARSER` constants — base URL, model id from `GROQ_MODEL`, default duration 60 minutes, confidence threshold — in one place next to `POLICY`; verify by grepping that no model id, base URL or magic duration appears anywhere else
 
 ## 2. Pure domain — intent types and room matching
 
@@ -31,11 +35,11 @@ These require no database, no network, and no API key.
 ## 4. Parser behind an interface
 
 - [ ] 4.1 Define the `IntentParser` interface and `StubIntentParser` in `lib/server/parse-intent.ts` (D6); verify a unit test drives a full parse-to-intent flow through the stub with no network access
-- [ ] 4.2 Implement `ClaudeIntentParser` using `client.messages.parse()` with `output_config: { format: zodOutputFormat(BookingIntentSchema) }` (D3); verify `npx tsc --noEmit` passes against the SDK's types
+- [ ] 4.2 Implement `GroqIntentParser` using the `openai` SDK with `baseURL` set to Groq and `response_format: { type: 'json_schema', json_schema: { name, strict: true, schema } }`, the schema DERIVED from the Zod schema rather than hand-maintained (D3); verify `npx tsc --noEmit` passes and a live parse returns a valid intent
 - [ ] 4.3 Put the user's text in a `user` message and operator instructions in the top-level `system` field, never concatenated (D4); verify by a unit test asserting the request body places the raw text in a user turn
-- [ ] 4.4 **EC-020** — a `null` `parsed_output` becomes `UNPARSEABLE`; verify by a unit test named for EC-020 using a stub that returns no parse
-- [ ] 4.5 **EC-025** — a missing API key, `Anthropic.RateLimitError`, or a connection error becomes `PARSER_UNAVAILABLE`; verify by a unit test named for EC-025 for each case, asserting errors are caught by SDK type most-specific-first and never by a bare catch
-- [ ] 4.6 Add a small live-parser test suite skipped when `ANTHROPIC_API_KEY` is absent; verify the full suite passes with the variable unset
+- [ ] 4.4 **EC-020** — a response that is not valid JSON, or is valid JSON failing the Zod schema, becomes `UNPARSEABLE`; verify by a unit test named for EC-020 covering both cases via the stub
+- [ ] 4.5 **EC-025** — a missing API key, `OpenAI.RateLimitError`, `OpenAI.AuthenticationError` or `OpenAI.APIConnectionError` becomes `PARSER_UNAVAILABLE`; verify by a unit test named for EC-025 for each case, asserting errors are caught by SDK type most-specific-first and never by a bare catch
+- [ ] 4.6 Add a small live-parser test suite skipped when `GROQ_API_KEY` is absent; verify the full suite passes with the variable unset
 
 ## 5. Server action and the guarded path
 
@@ -63,6 +67,6 @@ These require no database, no network, and no API key.
 
 - [ ] 8.1 Verify every new edge case EC-019 through EC-026 has a passing test naming it, by running `npm test -- --reporter=verbose` and grepping for each identifier
 - [ ] 8.2 Run the full suite and `npx tsc --noEmit`; verify 0 failures and no type errors
-- [ ] 8.3 Update `README.md` with the new capability and the required environment variable; verify the documented setup steps work from a clean clone
+- [ ] 8.3 Update `README.md` with the new capability and the required environment variables (`GROQ_API_KEY`, `GROQ_MODEL`); verify the documented setup steps work from a clean clone
 - [ ] 8.4 Run `openspec validate natural-language-booking --strict` and verify it reports no issues
 - [ ] 8.5 Archive the change with `openspec archive natural-language-booking` and verify the requirements now appear under `openspec/specs/natural-language-booking/`
