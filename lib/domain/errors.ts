@@ -30,9 +30,24 @@ export const CANCEL_ERROR_CODES = [
   'ALREADY_ENDED',           // EC-016
 ] as const;
 
+/**
+ * Refusals from free-text booking.
+ *
+ * None of these can produce a booking — they all end in the user being asked
+ * something, or being handed the manual form. The parser has no write path.
+ */
+export const PARSE_ERROR_CODES = [
+  'UNPARSEABLE',             // EC-020 — no intent could be derived
+  'AMBIGUOUS_ROOM',          // EC-019 — several rooms plausibly match
+  'MISSING_END_TIME',        // EC-024 — a default was applied; say so
+  'PARSER_UNAVAILABLE',      // EC-025 — no key, rate limit, or network failure
+  'LOW_CONFIDENCE',          // below threshold; confirm each field explicitly
+] as const;
+
 export type BookingErrorCode = (typeof BOOKING_ERROR_CODES)[number];
 export type CancelErrorCode = (typeof CANCEL_ERROR_CODES)[number];
-export type ErrorCode = BookingErrorCode | CancelErrorCode;
+export type ParseErrorCode = (typeof PARSE_ERROR_CODES)[number];
+export type ErrorCode = BookingErrorCode | CancelErrorCode | ParseErrorCode;
 
 /** The booking that already holds the requested slot (FR-009). */
 export type ConflictDetail = {
