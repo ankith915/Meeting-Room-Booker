@@ -32,7 +32,9 @@ npm install
 # .env.local  (gitignored — never commit)
 # DATABASE_URL=postgresql://user:pass@ep-xxx.region.aws.neon.tech/neondb?sslmode=require
 
-npx drizzle-kit push        # applies 0000_init.sql and 0001_exclusion_constraint.sql
+npm run db:migrate          # applies 0000_init.sql and 0001_exclusion_constraint.sql
+                            # NEVER `drizzle-kit push` — it does not know about the
+                            # hand-written constraint and will offer to drop it
 npm run seed                # reference rooms (A-005)
 npm run dev                 # http://localhost:3000
 ```
