@@ -78,9 +78,9 @@ clients; confirm exactly one booking exists in both cases.
 - [x] T022 [US1] **`app/actions/create-booking.ts`** per [contracts/create-booking.md](./contracts/create-booking.md) — validate → load room → time rules → INSERT → catch SQLSTATE `23P01` → `SLOT_TAKEN` (FR-004…FR-011). Depends on T018–T021
 - [x] T023 [US1] Catch **only** `23P01`; re-throw everything else. A bare catch is a constitutional violation (Constitution V)
 - [x] T024 [US1] Enrich `SLOT_TAKEN` with conflicting booking detail and alternatives (FR-009, FR-010)
-- [ ] T025 [US1] `app/page.tsx` — room list with date/time picker and live availability (FR-002)
-- [ ] T026 [US1] Booking form + confirmation, with the submit button disabled while in flight
-- [ ] T027 [US1] `SLOT_TAKEN` UI — show who holds the slot and offer alternatives as one-click rebook
+- [x] T025 [US1] `app/page.tsx` — room list with date/time picker and live availability (FR-002)
+- [x] T026 [US1] Booking form + confirmation, with the submit button disabled while in flight
+- [x] T027 [US1] `SLOT_TAKEN` UI — show who holds the slot and offer alternatives as one-click rebook
 
 **Checkpoint**: US1 fully functional. **EC-001 is demonstrable — this alone is a viable demo.**
 
@@ -104,9 +104,9 @@ times, and correct gaps.
 
 - [x] T032 [P] [US2] `lib/domain/schedule.ts` — `daySchedule()` (FR-012, FR-015). Pure
 - [x] T033 [P] [US2] `lib/domain/availability.ts` — `freeGaps()` (FR-013). Pure
-- [ ] T034 [US2] `app/actions/queries.ts` — `listAvailability`, `getDaySchedule` per [contracts/list-availability.md](./contracts/list-availability.md)
-- [ ] T035 [US2] `app/rooms/[roomId]/page.tsx` — day timeline, bookings and gaps, timezone labelled (FR-012…FR-015)
-- [ ] T036 [US2] Book-this-gap affordance routing into the same `createBooking` path
+- [x] T034 [US2] `app/actions/queries.ts` — `listAvailability`, `getDaySchedule` per [contracts/list-availability.md](./contracts/list-availability.md)
+- [x] T035 [US2] `app/rooms/[roomId]/page.tsx` — day timeline, bookings and gaps, timezone labelled (FR-012…FR-015)
+- [x] T036 [US2] Book-this-gap affordance routing into the same `createBooking` path
 
 **Checkpoint**: US1 and US2 both work independently.
 
@@ -129,7 +129,7 @@ times, and correct gaps.
 
 - [x] T041 [US3] `app/actions/cancel-booking.ts` per [contracts/cancel-booking.md](./contracts/cancel-booking.md). **Idempotency check must precede the organiser and ended checks** — see contract
 - [x] T042 [US3] `UPDATE ... WHERE id = ? AND status = 'confirmed'` to make concurrent double-cancel a no-op
-- [ ] T043 [US3] Cancel control on the schedule view with confirmation
+- [x] T043 [US3] Cancel control on the schedule view with confirmation
 
 **Checkpoint**: All three user stories independently functional.
 

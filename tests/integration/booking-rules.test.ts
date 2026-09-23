@@ -7,6 +7,7 @@
 
 import { describe, it, expect, beforeEach, afterAll } from 'vitest';
 import { createBooking, cancelBooking } from '@/lib/server/bookings';
+import { listAvailability } from '@/lib/server/queries';
 import { ROOM, at, futureDate, clearAllTestBookings, countConfirmed } from '../helpers';
 
 const DATE = futureDate(8);
@@ -118,6 +119,48 @@ describe('EC-005: cancelled bookings do not reserve time', () => {
 
     // The cancelled row is retained (FR-022) but only one CONFIRMED booking exists.
     expect(await countConfirmed(ROOM.aurora, at(DATE, '14:00'), at(DATE, '15:00'))).toBe(1);
+  });
+});
+
+describe('FR-002: the availability list agrees with the booking action', () => {
+  it('never reports a room as free when booking it would be refused', async () => {
+    // Found by eye during the UI build: Meridian (America/New_York) showed
+    // "Free" at 14:00 Kolkata, which is 04:30 in New York — before it opens.
+    // The list only checked for CONFLICTS, not the room's own hours, so it
+    // invited a click that always failed. This pins the two together.
+    const startsAt = new Date(at(DATE, '14:00'));
+    const endsAt = new Date(at(DATE, '15:00'));
+
+    const rows = await listAvailability(startsAt, endsAt);
+    expect(rows.length).toBeGreaterThan(0);
+
+    for (const row of rows) {
+      const attempt = await createBooking(
+        booking({
+          roomId: row.room.id,
+          organiser: 'agreement-check',
+          title: `Agreement check ${row.room.name}`,
+        }),
+      );
+
+      if (row.isFree) {
+        expect(attempt.ok, `${row.room.name} was listed free but booking failed`).toBe(true);
+      } else {
+        expect(attempt.ok, `${row.room.name} was listed unavailable but booking succeeded`)
+          .toBe(false);
+      }
+    }
+  });
+
+  it('a room outside its own hours is reported closed, not busy', async () => {
+    const rows = await listAvailability(new Date(at(DATE, '14:00')), new Date(at(DATE, '15:00')));
+    const meridian = rows.find((r) => r.room.id === ROOM.meridian);
+
+    expect(meridian).toBeDefined();
+    expect(meridian?.isFree).toBe(false);
+    // 'closed' rather than 'booked': nothing conflicts, the room is just shut.
+    expect(meridian?.reason).toBe('closed');
+    expect(meridian?.conflictCount).toBe(0);
   });
 });
 

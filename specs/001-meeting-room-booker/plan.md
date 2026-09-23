@@ -132,6 +132,14 @@ external API consumer. The one structural rule that matters is the `lib/domain/`
 not import from `db/`, `next/`, or `react`, which is what makes the spec's rules testable in
 isolation and keeps them from being quietly reimplemented inside a React component.
 
+**Deviation recorded during implementation**: the booking logic lives in
+`lib/server/bookings.ts` and `lib/server/queries.ts`, with `app/actions/*` as thin `'use server'`
+wrappers that add only cache revalidation and Date-to-string serialisation. The structure above put
+the logic directly in `app/actions/`. The change was made because a `'use server'` module importing
+`next/cache` cannot be imported by Vitest outside a Next runtime, and the concurrency test (T013)
+must call the real implementation. The constitution's domain-purity rule is unaffected: the guarded
+write still has exactly one entry point.
+
 `drizzle/0001_exclusion_constraint.sql` is hand-written and must stay that way — `drizzle-kit` does
 not generate `EXCLUDE` constraints or `CREATE EXTENSION`. This file is the literal embodiment of
 Constitution Principle I and is the single most important file in the repository.
