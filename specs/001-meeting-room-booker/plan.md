@@ -38,7 +38,7 @@ from the spec can be tested without a database.
 
 **Constraints**: Correctness under concurrency is absolute (SC-001 admits zero duplicates). Domain logic must be I/O-free and framework-free. All instants stored UTC (FR-021)
 
-**Scale/Scope**: Tens of rooms, hundreds of bookings/day (A-010). 3 user stories, 17 edge cases, 23 functional requirements, 4 screens
+**Scale/Scope**: Tens of rooms, hundreds of bookings/day (A-010). 3 user stories, 18 edge cases, 23 functional requirements, 4 screens
 
 ## Constitution Check
 
@@ -48,7 +48,7 @@ from the spec can be tested without a database.
 |---|---|---|---|
 | **I. Integrity at the lowest layer** (NON-NEGOTIABLE) | Is the non-overlap invariant enforced in the schema, with application checks demoted to UX only? | ✅ PASS | `EXCLUDE USING GIST` in [data-model.md](./data-model.md). SC-003 verifies the guarantee survives with app checks disabled |
 | **II. Specification before implementation** | Does every planned behaviour trace to a numbered requirement? | ✅ PASS | Every task in tasks.md cites an FR or EC identifier. No planned behaviour lacks a spec line |
-| **III. Every edge case has a named test** | Does each of EC-001…EC-017 have a test task? | ✅ PASS | tasks.md contains a test task per identifier; SC-002 is the acceptance measure |
+| **III. Every edge case has a named test** | Does each of EC-001…EC-018 have a test task? | ✅ PASS | tasks.md contains a test task per identifier; SC-002 is the acceptance measure |
 | **IV. UTC storage, local rendering; half-open intervals** | Is `[start, end)` expressed identically in schema, domain, and UI? | ✅ PASS | `tstzrange(..., '[)')` in schema; `overlaps()` uses strict `<` in domain; UI renders end-exclusive. All columns `timestamptz` |
 | **V. No silent failures** | Does every refusal carry a typed code and a specific message? | ✅ PASS | 9 reason codes defined in FR-008/FR-011; `BookingError` discriminated union; SC-005 measures 100% coverage |
 

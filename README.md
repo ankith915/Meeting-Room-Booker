@@ -149,7 +149,7 @@ BOLT-MVP/
 1. **`.specify/memory/constitution.md`** — 5 principles. Principle I explains everything else.
 2. **`specs/001-meeting-room-booker/diagrams/out/race-condition.svg`** — the whole argument in one
    picture.
-3. **`specs/001-meeting-room-booker/spec.md`** — the deliverable. 3 user stories, **17 edge cases**,
+3. **`specs/001-meeting-room-booker/spec.md`** — the deliverable. 3 user stories, **18 edge cases**,
    23 functional requirements, 7 success criteria, 10 assumptions.
 4. **`data-model.md`** — where the spec's invariant becomes one line of SQL.
 5. **`research.md`** — why that line, and what was rejected.
@@ -194,7 +194,7 @@ rest on application code — which is success criterion SC-003.
 Per Constitution Principle II, implementation begins only when all of these are true:
 
 - [x] Constitution written — 5 principles, Principle I non-negotiable
-- [x] `spec.md` covers all 17 edge cases with defined behaviour
+- [x] `spec.md` covers all 18 edge cases with defined behaviour
 - [x] Given/When/Then acceptance scenarios present
 - [x] No `[NEEDS CLARIFICATION]` markers remain
 - [x] `plan.md` names the `EXCLUDE` constraint as the EC-001 mechanism
@@ -275,14 +275,14 @@ npx vercel --prod          # set DATABASE_URL (and the model key for Part B)
 ## 8. The 5-minute demo script
 
 1. **`git log`** — "here is the commit with the spec and zero source files. The spec came first."
-2. **`spec.md`** — walk the Room⟶Booking relationship, half-open intervals, the 17 edge cases.
+2. **`spec.md`** — walk the Room⟶Booking relationship, half-open intervals, the 18 edge cases.
 3. **`race-condition.svg`** — why check-then-write fails.
 4. **`0001_exclusion_constraint.sql`** — "this spec sentence became this schema line." Point at
    `'[)'` and `WHERE status = 'confirmed'`.
 5. **Two tabs, same slot, simultaneous click** — one wins, one gets a clean refusal with
    alternatives.
 6. **Raw SQL insert** — still refused. "The guarantee is not in my code."
-7. **`npm test`** — 17 edge cases, one named test each.
+7. **`npm test`** — 18 edge cases, one named test each.
 8. **`openspec show`** the archived change — "this is how the spec evolved for v2."
 9. Close on the split: Spec Kit for greenfield, OpenSpec for change, both as agent harnesses.
 

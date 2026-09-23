@@ -65,7 +65,7 @@ clients; confirm exactly one booking exists in both cases.
 - [ ] T012 [P] [US1] Assert constraint exists by name — `tests/integration/constraint-present.test.ts`. Fails loudly if a migration ever drops it (plan.md risk 2)
 - [ ] **T013 [US1] EC-001 concurrency test** — `tests/concurrency/ec001-simultaneous.test.ts`. 50 parallel `createBooking` calls for one room and range; assert 1 fulfilled, 49 `SLOT_TAKEN`, **and `SELECT count(*) = 1`** (SC-001). **The centrepiece of the demo**
 - [ ] T014 [P] [US1] EC-002 partial overlap, EC-003 adjacent, EC-004 other room, EC-005 cancelled-does-not-block — `tests/integration/overlap.test.ts`
-- [ ] T015 [P] [US1] EC-006…EC-012 validation tests, one per reason code — `tests/unit/validation.test.ts`
+- [ ] T015 [P] [US1] EC-006…EC-012 and EC-018 validation tests, one per reason code — `tests/unit/validation.test.ts`
 - [ ] T016 [P] [US1] Pure `overlaps()` property tests: symmetry, adjacency, containment — `tests/unit/interval.test.ts`
 - [ ] T017 [US1] SC-003 test — disable app-layer availability checking via test flag; assert overlap still impossible
 
@@ -147,7 +147,7 @@ times, and correct gaps.
 - [ ] T049 [P] Re-render all four D2 diagrams; confirm none has drifted from the spec
 - [ ] T050 Write root `README.md` — the course hand-in document
 - [ ] T051 Deploy to Vercel; set `DATABASE_URL`; run T013 against production
-- [ ] T052 **Verify SC-002**: every one of EC-001…EC-017 has a passing named test. Any gap is an unmet requirement
+- [ ] T052 **Verify SC-002**: every one of EC-001…EC-018 has a passing named test. Any gap is an unmet requirement
 
 ---
 
@@ -210,11 +210,12 @@ breaking the previous ones.
 | EC-014 | T029 | T011, T035 |
 | EC-015, EC-016 | T037 | T041 |
 | EC-017 | T038 | T041 |
+| EC-018 | T015 | T020, T022 |
 | SC-001 | T013 | T007 |
 | SC-002 | T052 | all |
 | SC-003 | T017 | T007 |
 
-**17 edge cases, 17 covered.** Any row without a passing test is an unmet requirement (Constitution III).
+**18 edge cases, 18 covered.** Any row without a passing test is an unmet requirement (Constitution III).
 
 ---
 

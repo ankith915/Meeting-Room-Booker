@@ -110,6 +110,7 @@ most convincing thing to show a reviewer.**
 | EC-010 | a 9-hour range | `DURATION_EXCEEDED`, message names 8h |
 | EC-011 | blank title | `INVALID_TITLE` |
 | EC-012 | 23:00–01:00 | `OUTSIDE_BUSINESS_HOURS` |
+| EC-018 | a start more than 90 days ahead | `TOO_FAR_AHEAD`, message names the horizon |
 
 ### Time handling
 
@@ -140,13 +141,13 @@ npm run test:integration  # constraint behaviour — needs DATABASE_URL
 npm run test:concurrency  # EC-001 / SC-001
 ```
 
-**SC-002 requires every one of EC-001…EC-017 to have a passing named test.** Confirm with:
+**SC-002 requires every one of EC-001…EC-018 to have a passing named test.** Confirm with:
 
 ```powershell
 npm test -- --reporter=verbose | Select-String "EC-0"
 ```
 
-Seventeen distinct identifiers must appear. A missing one is an unmet requirement, not a missing
+Eighteen distinct identifiers must appear. A missing one is an unmet requirement, not a missing
 test.
 
 ## Regenerate diagrams

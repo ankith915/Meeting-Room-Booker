@@ -125,6 +125,9 @@ have at least one automated test naming it.
   length. **Expected**: refused `DURATION_EXCEEDED`, and the message names the maximum.
 - **EC-011 — Empty or over-long title.** The meeting title is blank, whitespace-only, or exceeds the
   permitted length. **Expected**: refused `INVALID_TITLE`.
+- **EC-018 — Booked too far ahead.** The requested start is more than the booking horizon into the
+  future. **Expected**: refused `TOO_FAR_AHEAD`, and the message names the horizon. Without this,
+  A-009's 90-day limit would be an assumption that no code enforced.
 
 #### Time handling
 
@@ -177,7 +180,8 @@ have at least one automated test naming it.
 - **FR-008**: System MUST validate, and refuse with the specified distinct reason codes: non-positive
   duration (`INVALID_RANGE`), start in the past (`PAST_BOOKING`), unknown room (`ROOM_NOT_FOUND`),
   inactive room (`ROOM_INACTIVE`), range outside bookable hours (`OUTSIDE_BUSINESS_HOURS`), duration
-  above maximum (`DURATION_EXCEEDED`), and invalid title (`INVALID_TITLE`).
+  above maximum (`DURATION_EXCEEDED`), invalid title (`INVALID_TITLE`), and start beyond the
+  booking horizon (`TOO_FAR_AHEAD`).
 - **FR-009**: System MUST, on refusing with `SLOT_TAKEN`, include the conflicting booking's title,
   organiser, and time range in the response.
 - **FR-010**: System MUST, on refusing with `SLOT_TAKEN`, suggest alternatives where any exist:
@@ -242,7 +246,7 @@ have at least one automated test naming it.
 - **SC-001**: Under 50 concurrent requests for one identical room and time range, exactly 1 is
   confirmed and 49 are refused with `SLOT_TAKEN`; the stored count of confirmed bookings for that
   room and range is exactly 1. Zero tolerance — a single duplicate is a total failure.
-- **SC-002**: Every edge case EC-001 through EC-017 has at least one automated test that names its
+- **SC-002**: Every edge case EC-001 through EC-018 has at least one automated test that names its
   identifier, and all such tests pass.
 - **SC-003**: With all application-layer availability checks disabled, attempting to create an
   overlapping confirmed booking still fails. This demonstrates the guarantee does not rest on
